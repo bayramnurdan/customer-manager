@@ -41,36 +41,48 @@ public class CustomerManager implements CustomerService {
     }
 
     @Override
-    public CreateCustomerResponse add(CreateCustomerRequest request) {
-
-        if (customerValidationService.validateCustomer(request)){
-            Customer customer = mapper.map(request, Customer.class);
-            customer.setId(0);
-            repository.save(customer);
-            CreateCustomerResponse response = mapper.map(customer, CreateCustomerResponse.class);
-            return response;
-
-        }
-
+    public CreateCustomerResponse add(CreateCustomerRequest request) throws Exception{
+        checkIfExists(request.getNationalIdentity());
+        checkIfRealPerson(request);
+        Customer customer = mapper.map(request, Customer.class);
+        customer.setId(0);
+        repository.save(customer);
+        CreateCustomerResponse response = mapper.map(customer, CreateCustomerResponse.class);
+        return response;
     }
 
     @Override
     public UpdateCustomerResponse update(int id, UpdateCustomerRequest request) {
+        checkIfCustomer(id);
         Customer customer = mapper.map(request, Customer.class);
         customer.setId(id);
         repository.save(customer);
         UpdateCustomerResponse response = mapper.map(customer, UpdateCustomerResponse.class);
         return response;
-
     }
 
 
     @Override
     public void delete(int id) {
+        checkIfCustomer(id);
         repository.deleteById(id);
-
     }
 
     //Business Rules
+
+    public void checkIfRealPerson(CreateCustomerRequest request) throws Exception{
+    if (!customerValidationService.validateCustomer(request)) throw new RuntimeException("Validasyon sağlanamadı");
+    }
+
+    public void checkIfExists(String nationalId){
+        if(repository.existsByNationalIdentity(nationalId)){
+            throw new RuntimeException("Müşteri sistemde zaten kayıtlı!");
+        }
+    }
+
+    public void checkIfCustomer(int id){
+        if(!repository.existsById(id)) throw  new RuntimeException("Müşteri bulunamadı!");
+
+    }
 
 }

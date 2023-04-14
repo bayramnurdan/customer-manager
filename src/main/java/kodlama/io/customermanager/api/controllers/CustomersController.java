@@ -29,7 +29,7 @@ public class CustomersController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    CreateCustomerResponse add(@RequestBody CreateCustomerRequest request){
+    CreateCustomerResponse add(@RequestBody CreateCustomerRequest request) throws Exception{
         return service.add(request);
     }
 
@@ -38,7 +38,7 @@ public class CustomersController {
         return service.update(id, request);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void delete(@PathVariable int id){
         service.delete(id);
